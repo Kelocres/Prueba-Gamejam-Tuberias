@@ -17,7 +17,6 @@
 namespace Photon.Realtime
 {
     using System;
-    using System.Diagnostics;
     using SupportClass = ExitGames.Client.Photon.SupportClass;
 
     #if SUPPORTED_UNITY
@@ -36,14 +35,11 @@ namespace Photon.Realtime
         /// </summary>
         public LoadBalancingClient Client { get; set; }
 
-        /// <summary>Option to let the fallback thread call Disconnect after the KeepAliveInBackground time. Default: false.</summary>
-        /// <remarks>
-        /// If set to true, the thread will disconnect the client regularly, should the client not call SendOutgoingCommands / Service.
-        /// This may happen due to an app being in background (and not getting a lot of CPU time) or when loading assets.
-        ///
-        /// If false, a regular timeout time will have to pass (on top) to time out the client.
-        /// </remarks>
-        public bool DisconnectAfterKeepAlive = false;
+        private byte fallbackThreadId = 255;
+
+        private bool didSendAcks;
+        private int startedAckingTimestamp;
+        private int deltaSinceStartedToAck;
 
         /// <summary>Defines for how long the Fallback Thread should keep the connection, before it may time out as usual.</summary>
         /// <remarks>We want to the Client to keep it's connection when an app is in the background (and doesn't call Update / Service Clients should not keep their connection indefinitely in the background, so after some milliseconds, the Fallback Thread should stop keeping it up.</remarks>
@@ -52,11 +48,13 @@ namespace Photon.Realtime
         /// <summary>Counts how often the Fallback Thread called SendAcksOnly, which is purely of interest to monitor if the game logic called SendOutgoingCommands as intended.</summary>
         public int CountSendAcksOnly { get; private set; }
 
-        /// <summary>True if a fallback thread is running. Will call the client's SendAcksOnly() method to keep the connection up.</summary>
         public bool FallbackThreadRunning
         {
             get { return this.fallbackThreadId < 255; }
         }
+
+
+        #if SUPPORTED_UNITY
 
         /// <summary>Keeps the ConnectionHandler, even if a new scene gets loaded.</summary>
         public bool ApplyDontDestroyOnLoad = true;
@@ -64,28 +62,6 @@ namespace Photon.Realtime
         /// <summary>Indicates that the app is closing. Set in OnApplicationQuit().</summary>
         [NonSerialized]
         public static bool AppQuits;
-
-
-        private byte fallbackThreadId = 255;
-        private bool didSendAcks;
-        private readonly Stopwatch backgroundStopwatch = new Stopwatch();
-
-
-        #if SUPPORTED_UNITY
-
-        #if UNITY_2019_4_OR_NEWER
-
-        /// <summary>
-        /// Resets statics for Domain Reload
-        /// </summary>
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        static void StaticReset()
-        {
-            AppQuits = false;
-        }
-
-        #endif
-
 
         /// <summary>Called by Unity when the application gets closed. The UnityEngine will also call OnDisable, which disconnects.</summary>
         protected void OnApplicationQuit()
@@ -112,7 +88,7 @@ namespace Photon.Realtime
             {
                 if (this.Client != null && this.Client.IsConnected)
                 {
-                    this.Client.Disconnect(DisconnectCause.ApplicationQuit);
+                    this.Client.Disconnect();
                     this.Client.LoadBalancingPeer.StopThread();
                 }
 
@@ -166,20 +142,18 @@ namespace Photon.Realtime
 
                 if (this.Client.LoadBalancingPeer.ConnectionTime - this.Client.LoadBalancingPeer.LastSendOutgoingTime > 100)
                 {
-                    if (!this.didSendAcks)
+                    if (this.didSendAcks)
                     {
-                        backgroundStopwatch.Reset();
-                        backgroundStopwatch.Start();
-                    }
-
-                    // check if the client should disconnect after some seconds in background
-                    if (backgroundStopwatch.ElapsedMilliseconds > this.KeepAliveInBackground)
-                    {
-                        if (this.DisconnectAfterKeepAlive)
+                        // check if the client should disconnect after some seconds in background
+                        this.deltaSinceStartedToAck = Environment.TickCount - this.startedAckingTimestamp;
+                        if (this.deltaSinceStartedToAck > this.KeepAliveInBackground)
                         {
-                            this.Client.Disconnect();
+                            return true;
                         }
-                        return true;
+                    }
+                    else
+                    {
+                        this.startedAckingTimestamp = Environment.TickCount;
                     }
 
 
