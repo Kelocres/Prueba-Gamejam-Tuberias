@@ -16,6 +16,7 @@ public class TuberiaScript : MonoBehaviour
     public bool inamovible;
     public bool llenandose; //La tuberia se está llenando de líquido
     private bool lleno; //La tubería está definitivamente llena y con todas sus salidas dando líquido
+    public bool conectado;
 
     //public bool conectado;
     //public bool conectado_a_fuente;
@@ -24,6 +25,10 @@ public class TuberiaScript : MonoBehaviour
 
     void Start()
     {
+        inamovible = false;
+        llenandose = false;
+        lleno = false;
+        conectado = false;
         //Recoger los delegates de las salidas
         salidas = new List<SalidaTuberiaScript>();
         
@@ -45,9 +50,7 @@ public class TuberiaScript : MonoBehaviour
 
         //conectado_a_fuente = false;
         //posicion_fila = -1;
-        inamovible = false;
-        llenandose = false;
-        lleno = false;
+        
     }
 
     // Update is called once per frame
@@ -69,11 +72,12 @@ public class TuberiaScript : MonoBehaviour
         }
     }
 
-    private void ConexionSalida(int idSalida, bool conectado)
+    private void ConexionSalida(int idSalida, bool conect)
     {
-        if(conectado)
+        if(conect)
         {
             Debug.Log("Conectado");
+            conectado = true;
             /*
             if(fuente != null)
             {
@@ -90,6 +94,7 @@ public class TuberiaScript : MonoBehaviour
         else
         {
             Debug.Log("Desconectado");
+            conectado = false;
         }
     }
 
