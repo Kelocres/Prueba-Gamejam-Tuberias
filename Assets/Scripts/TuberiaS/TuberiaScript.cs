@@ -5,7 +5,7 @@ using UnityEngine;
 public class TuberiaScript : MonoBehaviour
 {
     // Para recoger los delegates de las salidas
-    SalidaTuberiaScript[] salidas;
+    List <SalidaTuberiaScript> salidas;
 
     public int entradaLiquido = -1;
     //public int salidaLiquido = -1;
@@ -25,18 +25,23 @@ public class TuberiaScript : MonoBehaviour
     void Start()
     {
         //Recoger los delegates de las salidas
-        salidas = new SalidaTuberiaScript[transform.childCount];
+        salidas = new List<SalidaTuberiaScript>();
+        
         int numChild = 0;
-        while(numChild <salidas.Length && transform.GetChild(numChild).GetComponent<SalidaTuberiaScript>() != null)
+        //while(numChild <salidas.Length && transform.GetChild(numChild).GetComponent<SalidaTuberiaScript>() != null)
+        for (int i = 0; i < transform.childCount; ++i)
         {
-            salidas[numChild] = transform.GetChild(numChild).GetComponent<SalidaTuberiaScript>();
-            salidas[numChild].idSalida = numChild;
-            salidas[numChild].delSalida += ConexionSalida;
-            salidas[numChild].delRecibir += RellenarTuberia;
+            if (transform.GetChild(i).GetComponent<SalidaTuberiaScript>() != null)
+            {
+                salidas.Add(transform.GetChild(i).GetComponent<SalidaTuberiaScript>());
+                salidas[numChild].idSalida = numChild;
+                salidas[numChild].delSalida += ConexionSalida;
+                salidas[numChild].delRecibir += RellenarTuberia;
 
-            numChild++;
+                numChild++;
+            }
         }
-        Debug.Log("Numero salidas: " + salidas.Length);
+        Debug.Log("Numero salidas: " + salidas.Count);
 
         //conectado_a_fuente = false;
         //posicion_fila = -1;
@@ -68,7 +73,7 @@ public class TuberiaScript : MonoBehaviour
     {
         if(conectado)
         {
-            //Debug.Log("Conectado");
+            Debug.Log("Conectado");
             /*
             if(fuente != null)
             {
@@ -84,7 +89,7 @@ public class TuberiaScript : MonoBehaviour
         }
         else
         {
-            //Debug.Log("Desconectado");
+            Debug.Log("Desconectado");
         }
     }
 
@@ -97,7 +102,7 @@ public class TuberiaScript : MonoBehaviour
 
     private void RellenarOtrasTuberias()
     {
-        for(int i=0; i<salidas.Length; i++)
+        for(int i=0; i<salidas.Count; i++)
         {
             if(i != entradaLiquido)
             {
