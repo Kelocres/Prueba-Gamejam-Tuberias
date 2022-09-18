@@ -1,6 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
+using UnityEngine.UI;
+
 
 public class Jugador : MonoBehaviour
 {
@@ -8,19 +11,54 @@ public class Jugador : MonoBehaviour
     [SerializeField] private float playerRotation;
     [SerializeField] private float speedRotation;
     [SerializeField] private Animator anim;
+    
+    //Seleccion de herramienta
+    [SerializeField] private string herramientaActual;
+    [SerializeField] private TMP_Text herramientaTxt;
+    
+    //Herramientas para equipar
+    [SerializeField] private GameObject martilloEquip, soldadorEquip, selladorEquip;
 
     private Rigidbody rB;
     private float movH;
     private float movV;
+
     private bool retardoAccion = true;
 
-    void Start()
+	private void Awake()
+	{
+        herramientaTxt = GameObject.FindGameObjectWithTag("HerramientaTxt").GetComponent<TMP_Text>();
+    }
+
+	void Start()
     {
         rB = GetComponent<Rigidbody>();
         anim = GetComponent<Animator>();
+        herramientaActual = "Martillo";        
+        martilloEquip.SetActive(true);
     }
 
-    void FixedUpdate()
+	private void Update()
+	{
+        if (Input.GetMouseButtonDown(0))
+        {
+            if(herramientaActual == "Martillo")
+            {
+                LanzarMartillo();
+			}
+            if (herramientaActual == "Soldador")
+            {
+                Soldar();
+            }
+            if (herramientaActual == "Sellador")
+            {
+                LanzarGancho();
+            }            
+        }
+        herramientaTxt.text = herramientaActual;
+    }
+
+	void FixedUpdate()
     {
         movH = Input.GetAxisRaw("Horizontal");
         movV = Input.GetAxisRaw("Vertical");
@@ -54,13 +92,7 @@ public class Jugador : MonoBehaviour
         {
             movV = 0;
             anim.SetInteger("Atras", 0);
-        }
-
-        if (Input.GetMouseButtonDown(0))
-        {
-            LanzarGancho();
-            LanzarMartillo();
-        }        
+        }     
     }
 
     private void PlayerMov()
@@ -90,9 +122,51 @@ public class Jugador : MonoBehaviour
         }
     }
 
+    private void Soldar()
+    {
+        if (retardoAccion)
+        {
+            anim.SetTrigger("Soldar");
+            retardoAccion = false;
+            StartCoroutine(Retraso(5));
+        }
+    }
+
     IEnumerator Retraso(float time)
     {
         yield return new WaitForSeconds(time);
         retardoAccion = true;
+    }
+
+	private void OnTriggerEnter(Collider other)
+	{
+        //verificar colision
+        if(other.CompareTag("Martillo"))
+        {
+            print("seleccionar martillo");
+            soldadorEquip.SetActive(false);
+            selladorEquip.SetActive(false);
+            martilloEquip.SetActive(true);
+            herramientaActual = "Martillo";
+        }
+
+        if (other.CompareTag("Soldador"))
+        {
+            print("seleccionar Soldador");
+            selladorEquip.SetActive(false);
+            martilloEquip.SetActive(false);
+            soldadorEquip.SetActive(true);
+            herramientaActual = "Soldador";
+        }
+
+        if (other.CompareTag("Sellador"))
+        {
+            print("seleccionar Sellador");            
+            martilloEquip.SetActive(false);
+            soldadorEquip.SetActive(false);
+            selladorEquip.SetActive(true);
+            herramientaActual = "Sellador";
+        }
+
     }
 }

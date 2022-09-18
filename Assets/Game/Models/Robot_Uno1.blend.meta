@@ -88,7 +88,7 @@ ModelImporter:
       name: Adelante
       takeName: Scene
       internalID: 0
-      firstFrame: 254
+      firstFrame: 351
       lastFrame: 352
       wrapMode: 0
       orientationOffsetY: 0
@@ -117,7 +117,7 @@ ModelImporter:
       name: Atras
       takeName: Scene
       internalID: 0
-      firstFrame: 354
+      firstFrame: 459
       lastFrame: 460
       wrapMode: 0
       orientationOffsetY: 0
@@ -205,7 +205,7 @@ ModelImporter:
       takeName: Scene
       internalID: 0
       firstFrame: 32
-      lastFrame: 79
+      lastFrame: 51
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
