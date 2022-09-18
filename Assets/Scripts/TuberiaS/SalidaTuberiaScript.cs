@@ -19,9 +19,14 @@ public class SalidaTuberiaScript : MonoBehaviour
     //Para identificar si la conexión es a una tubería o a la fuente
     private SalidaTuberiaScript salidaConectada;
 
+    //Para actualizar el cilindro de líquido
+    private LiquidoTuboScript liquidoTubo;
+
     void Start()
     {
         conectado = false;
+        if(GetComponent<LiquidoTuboScript>() != null)
+            liquidoTubo = GetComponent<LiquidoTuboScript>();
     }
 
     private void OnTriggerEnter(Collider other)
@@ -70,5 +75,11 @@ public class SalidaTuberiaScript : MonoBehaviour
             Debug.Log("SALIDA TUBERIA SCRIPT Se va a recibir liquido en la tuberia/destino");
             delRecibir(idSalida);
         }
+    }
+
+    public void ActualizarLiquido(float cantidadLiquido)
+    {
+        if (liquidoTubo != null)
+            liquidoTubo.ActualizarLiquido(cantidadLiquido);
     }
 }

@@ -38,6 +38,7 @@ public class ManagerScript_PuzzleTuberias : MonoBehaviour
 
     public void IniciarPuzzle()
     {
+        Debug.Log("IniciarPuzzle()");
         if (!puzzleIniciado)
         {
             puzzleIniciado = true;

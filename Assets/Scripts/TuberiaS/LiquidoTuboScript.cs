@@ -6,18 +6,26 @@ public class LiquidoTuboScript : MonoBehaviour
 {
     
     public FragmentoLiquido [] fragmentos;
+    private int fragmentoActual;
 
     void Start()
     {
-        /*if(cilindros_Liquido != null && cilindros_Liquido.Length > 0)
-        {
+        fragmentoActual = 1;
 
-        }*/
+        if(fragmentos != null && fragmentos.Length > 0)
+            foreach(FragmentoLiquido frag in fragmentos)
+            {
+                frag.delTope += FragmentoAlTope;
+            }
     }
 
-    // Update is called once per frame
-    void Update()
+    public void ActualizarLiquido(float cantidadLiquido)
     {
-        
+
+    }
+
+    private void FragmentoAlTope()
+    {
+
     }
 }
